@@ -9,8 +9,16 @@ import { Quiz } from './database/entities/quiz.entity';
 import { Question } from './database/entities/questions.entity';
 import { Result } from './database/entities/results.entity';
 import { User } from './database/entities/users.entity';
+import { AuthModule } from './modules/auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
+
 @Module({
   imports: [
+    JwtModule.register({
+      global: true,
+      secret: '123',
+      signOptions: { expiresIn: '1h' },
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
@@ -21,6 +29,7 @@ import { User } from './database/entities/users.entity';
       entities: [Quiz, User, Question, Result],
       synchronize: true,
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
