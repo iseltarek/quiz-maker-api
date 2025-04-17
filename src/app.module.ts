@@ -1,9 +1,27 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Quiz } from './database/entities/quiz.entity';
+import { Question } from './database/entities/questions.entity';
+import { Result } from './database/entities/results.entity';
+import { User } from './database/entities/users.entity';
 @Module({
-  imports: [],
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'mysql',
+      host: 'localhost',
+      port: 3306,
+      username: 'root',
+      password: 'iseL2424#',
+      database: 'quiz_maker',
+      entities: [Quiz, User, Question, Result],
+      synchronize: true,
+    }),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
