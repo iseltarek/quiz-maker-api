@@ -3,10 +3,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { Question } from './questions.entity';
 import { Result } from './results.entity';
@@ -21,26 +22,24 @@ export class Quiz {
   title: string;
 
   @Column()
-  duration_minutes: number;
+  duration: number;
 
-  @Column({ length: 200, nullable: true })
+  @Column({ nullable: true })
   description: string;
 
   @Column({ default: false })
-  is_published: boolean;
-
-  @UpdateDateColumn()
-  startedAt: Date;
+  isPublished: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @OneToMany(() => Question, (question) => question.quiz)
+  @ManyToOne(() => User, (user) => user.createdQuizzes)
+  createdBy: User;
+
+  @ManyToMany(() => Question)
+  @JoinTable()
   questions: Question[];
 
   @OneToMany(() => Result, (result) => result.quiz)
   results: Result[];
-
-  @ManyToOne(() => User, (user) => user.createdQuizzes)
-  createdBy: User;
 }

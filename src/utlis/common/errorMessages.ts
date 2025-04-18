@@ -17,10 +17,12 @@ export class ErrorMessages {
       'An error occurred while creating the user. Please try again later.',
     user_not_found: 'No user found with the provided details.',
   };
-
+  static readonly quiz = {
+    invalid_quiz_id: 'Invalid quiz id',
+  };
   static readonly permission = {
-    only_owner: 'Only the owner can perform this action on this todo',
-    read_only: 'You do not have permission to modify this todo',
-    not_accessible: 'You do not have access to todo',
+    only_owner: 'Only teachers can perform this action on exams',
+    read_only: 'You do not have permission to modify  on exams',
+    not_accessible: 'You do not have access to exam',
   };
 }

@@ -65,15 +65,20 @@ export class AuthService {
 
     const payload = {
       id: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
+      // username: user.username,
+      // email: user.email,
+      // role: user.role,
     };
     return {
       verificationToken: await this.jwtService.signAsync(payload, {
         noTimestamp: true,
       }),
-      user: payload,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
     };
   }
 }
