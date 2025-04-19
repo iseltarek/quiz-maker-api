@@ -2,11 +2,8 @@
 import { QuestionType } from 'src/utlis/enum/question-type.enum';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from './users.entity';
-
-interface QuestionOption {
-  id: string;
-  text: string;
-}
+import { QuestionOption } from 'src/utlis/common/questionOption.interface';
+import { Quiz } from './quiz.entity';
 
 @Entity('questions')
 export class Question {
@@ -19,12 +16,14 @@ export class Question {
   @Column({ type: 'enum', enum: QuestionType })
   type: QuestionType;
 
-  @Column('simple-json')
+  @Column('simple-json', { nullable: true })
   options: QuestionOption[];
 
   @Column()
   correctAnswer: string;
 
+  @ManyToOne(() => Quiz, (quiz) => quiz.questions)
+  quiz: Quiz;
   @ManyToOne(() => User, (user) => user.createdQuestions)
   createdBy: User;
 }

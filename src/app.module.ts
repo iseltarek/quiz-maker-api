@@ -13,6 +13,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 
 import { QuizModule } from './modules/quiz/quiz.module';
+import { QuestionModule } from './modules/question/question.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { QuizModule } from './modules/quiz/quiz.module';
     }),
     AuthModule,
     QuizModule,
+    QuestionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

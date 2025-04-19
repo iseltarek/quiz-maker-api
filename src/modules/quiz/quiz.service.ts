@@ -97,7 +97,7 @@ export class QuizService {
           id: true,
         },
         duration: true,
-        // questions: true,
+        questions: true,
         description: true,
         createdAt: true,
       },

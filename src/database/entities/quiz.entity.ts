@@ -3,8 +3,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -36,10 +34,11 @@ export class Quiz {
   @ManyToOne(() => User, (user) => user.createdQuizzes)
   createdBy: User;
 
-  @ManyToMany(() => Question)
-  @JoinTable()
+  // @ManyToMany(() => Question)
+  // @JoinTable()
+  // questions: Question[];
+  @OneToMany(() => Question, (question) => question.quiz, { cascade: true })
   questions: Question[];
-
   @OneToMany(() => Result, (result) => result.quiz)
   results: Result[];
 }
