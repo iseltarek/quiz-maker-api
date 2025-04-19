@@ -12,6 +12,8 @@ import { User } from './database/entities/users.entity';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 
+import { QuizModule } from './modules/quiz/quiz.module';
+
 @Module({
   imports: [
     JwtModule.register({
@@ -30,6 +32,7 @@ import { JwtModule } from '@nestjs/jwt';
       synchronize: true,
     }),
     AuthModule,
+    QuizModule,
   ],
   controllers: [AppController],
   providers: [AppService],

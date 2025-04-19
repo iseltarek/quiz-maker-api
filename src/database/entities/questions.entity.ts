@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { QuestionType } from 'src/utlis/enum/question-type.enum';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Quiz } from './quiz.entity';
+import { User } from './users.entity';
 
 interface QuestionOption {
   id: string;
@@ -14,7 +14,7 @@ export class Question {
   id: number;
 
   @Column()
-  questionText: string;
+  text: string;
 
   @Column({ type: 'enum', enum: QuestionType })
   type: QuestionType;
@@ -23,8 +23,8 @@ export class Question {
   options: QuestionOption[];
 
   @Column()
-  correct_answer: string;
+  correctAnswer: string;
 
-  @ManyToOne(() => Quiz, (quiz) => quiz.questions)
-  quiz: Quiz;
+  @ManyToOne(() => User, (user) => user.createdQuestions)
+  createdBy: User;
 }
