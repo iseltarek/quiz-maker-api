@@ -24,8 +24,11 @@ export class QuizController {
   @Post('teacher/:teacherId/quiz')
   public createQuiz(
     @CurrentUser() teacher: { id: number },
+    @Param('teacherId') teacherId: number,
     @Body() body: CreateQuizDto,
   ) {
+    if (teacherId != teacher.id)
+      throw new BadRequestException(ErrorMessages.user.user_id_invalid);
     return this.quizService.createQuiz(teacher.id, body);
   }
 
@@ -35,7 +38,7 @@ export class QuizController {
     @CurrentUser() student: { id: number },
   ) {
     if (id != student.id)
-      throw new BadRequestException(ErrorMessages.auth.unauthorized);
+      throw new BadRequestException(ErrorMessages.user.user_id_invalid);
     return this.quizService.getAllPublishedQuizzes(student.id);
   }
 
@@ -46,11 +49,11 @@ export class QuizController {
 
   @Get('teacher/:teacherId/quiz')
   public getAllQuizzesForTeacher(
-    @Param('teachertId') id: number,
+    @Param('teacherId') teacherId: number,
     @CurrentUser() teacher: { id: number },
   ) {
-    if (id != teacher.id)
-      throw new BadRequestException(ErrorMessages.auth.unauthorized);
+    if (teacherId != teacher.id)
+      throw new BadRequestException(ErrorMessages.user.user_id_invalid);
     return this.quizService.getAllQuizzesForTeacher(teacher.id);
   }
 

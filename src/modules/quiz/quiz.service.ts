@@ -27,6 +27,7 @@ export class QuizService {
 
     const { title, duration, description, is_published, questionsIds } =
       createQuizDto;
+
     await this.validateQuestionIds(questionsIds);
 
     const newQuiz = this.quizRepository.create({
@@ -37,8 +38,17 @@ export class QuizService {
       isPublished: is_published,
       createdBy: teacher,
     });
-    await this.quizRepository.save(newQuiz);
-    return newQuiz;
+    const savedQuiz = await this.quizRepository.save(newQuiz);
+
+    return {
+      id: savedQuiz.id,
+      title: savedQuiz.title,
+      duration: savedQuiz.duration,
+      description: savedQuiz.description,
+      isPublished: savedQuiz.isPublished,
+      createdBy: savedQuiz.createdBy.id,
+      createdAt: savedQuiz.createdAt,
+    };
   }
 
   public async getAllPublishedQuizzes(userId: number) {
@@ -77,7 +87,21 @@ export class QuizService {
   }
 
   public async getQuizById(quizId: number) {
-    const quiz = await this.quizRepository.findOne({ where: { id: quizId } });
+    const quiz = await this.quizRepository.findOne({
+      where: { id: quizId },
+      relations: ['createdBy', 'questions'],
+      select: {
+        id: true,
+        title: true,
+        createdBy: {
+          id: true,
+        },
+        duration: true,
+        // questions: true,
+        description: true,
+        createdAt: true,
+      },
+    });
     if (!quiz)
       throw new BadRequestException(ErrorMessages.quiz.invalid_quiz_id);
     return quiz;

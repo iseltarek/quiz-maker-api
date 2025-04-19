@@ -16,6 +16,7 @@ export class ErrorMessages {
     user_creation_failed:
       'An error occurred while creating the user. Please try again later.',
     user_not_found: 'No user found with the provided details.',
+    user_id_invalid: 'user id invalid',
   };
   static readonly quiz = {
     invalid_quiz_id: 'Invalid quiz id',
