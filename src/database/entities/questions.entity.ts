@@ -22,8 +22,8 @@ export class Question {
   @Column()
   correctAnswer: string;
 
-  @ManyToOne(() => Quiz, (quiz) => quiz.questions)
-  quiz: Quiz;
+  @ManyToOne(() => Quiz, (quiz) => quiz.questions, { nullable: true })
+  quiz: Quiz | null;
   @ManyToOne(() => User, (user) => user.createdQuestions)
   createdBy: User;
 }
