@@ -15,6 +15,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { QuizModule } from './modules/quiz/quiz.module';
 import { QuestionModule } from './modules/question/question.module';
 import { SubmittedAnswer } from './database/entities/submitedAnswers.entity';
+import { QuizSubmissionModule } from './modules/quiz-submission/quiz-submission.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { SubmittedAnswer } from './database/entities/submitedAnswers.entity';
     AuthModule,
     QuizModule,
     QuestionModule,
+    QuizSubmissionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

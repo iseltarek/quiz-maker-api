@@ -1,5 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { IsDate, IsNotEmpty } from '@nestjs/class-validator';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -27,6 +28,7 @@ export class CreateQuizDto {
 
   @IsNotEmpty()
   @IsDate()
+  @Type(() => Date)
   startAt: Date;
 
   @IsArray()

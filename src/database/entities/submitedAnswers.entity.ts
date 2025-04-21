@@ -3,7 +3,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Question } from './questions.entity';
 import { Result } from './results.entity';
 
-@Entity('submitedAnswers')
+@Entity('submited-answers')
 export class SubmittedAnswer {
   @PrimaryGeneratedColumn()
   id: number;
