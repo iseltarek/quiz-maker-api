@@ -19,7 +19,8 @@ export class ErrorMessages {
     user_id_invalid: 'user id invalid',
   };
   static readonly quiz = {
-    invalid_quiz_id: 'Invalid quiz id',
+    invalid_quiz_id: 'Invalid id',
+    questions: 'Quiz must atleast have 2 questions and at most 10',
   };
   static readonly permission = {
     only_owner: 'Only teachers can perform this action on exams',

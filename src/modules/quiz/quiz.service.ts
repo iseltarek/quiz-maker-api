@@ -3,16 +3,18 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Quiz } from 'src/database/entities/quiz.entity';
-import { In, Repository } from 'typeorm';
+import { In, LessThanOrEqual, Repository } from 'typeorm';
 import { User } from 'src/database/entities/users.entity';
 import { CreateQuizDto } from './dtos/create-quiz.dto';
 import { ErrorMessages } from 'src/utlis/common/errorMessages';
 import { Role } from 'src/utlis/enum/user-role.enum';
 import { Question } from 'src/database/entities/questions.entity';
+import { QuizResponseDto } from './dtos/quizResponse.dto';
 @Injectable()
 export class QuizService {
   constructor(
@@ -25,21 +27,29 @@ export class QuizService {
   public async createQuiz(teacherId: number, createQuizDto: CreateQuizDto) {
     const teacher = await this.validateUserRole(teacherId, Role.TEACHER);
 
-    const { title, duration, description, is_published, questionsIds } =
+    const { title, duration, startAt, description, is_published, questions } =
       createQuizDto;
-
-    await this.validateQuestionIds(questionsIds);
+    if (questions.length > 20 || questions.length < 2)
+      throw new BadRequestException(ErrorMessages.quiz.questions);
+    const createdQuestions = questions.map((question) =>
+      this.questionRepository.create({
+        ...question,
+        createdBy: { id: teacher.id },
+        quiz: null,
+      }),
+    );
+    await this.questionRepository.save(createdQuestions);
 
     const newQuiz = this.quizRepository.create({
       title,
       duration,
       description,
-      questions: questionsIds.map((id) => ({ id })),
+      questions,
+      startAt,
       isPublished: is_published,
-      createdBy: teacher,
+      createdBy: { id: teacher.id, username: teacher.username },
     });
     const savedQuiz = await this.quizRepository.save(newQuiz);
-
     return {
       id: savedQuiz.id,
       title: savedQuiz.title,
@@ -48,21 +58,57 @@ export class QuizService {
       isPublished: savedQuiz.isPublished,
       createdBy: savedQuiz.createdBy.id,
       createdAt: savedQuiz.createdAt,
+      questions: savedQuiz.questions,
+      startAt: savedQuiz.startAt,
     };
   }
 
-  public async getAllPublishedQuizzes(userId: number) {
+  public async getAllPublishedQuizzes(
+    userId: number,
+  ): Promise<QuizResponseDto[]> {
     await this.validateUserRole(userId, Role.STUDENT);
-    return this.quizRepository.find({
-      //   where: { isPublished: true },
+    const now = new Date();
+
+    const quizzes = this.quizRepository.find({
+      where: { startAt: LessThanOrEqual(now) },
+      relations: ['createdBy'],
+      select: {
+        id: true,
+        title: true,
+        duration: true,
+        startAt: true,
+        questions: {
+          id: true,
+          text: true,
+          type: true,
+          options: true,
+        },
+        description: true,
+        createdAt: true,
+        createdBy: {
+          id: true,
+          username: true,
+        },
+      },
     });
+    return quizzes;
   }
 
-  public async getAllQuizzesForTeacher(teacherId: number) {
+  public async getAllQuizzesForTeacher(
+    teacherId: number,
+  ): Promise<QuizResponseDto[]> {
     const teacher = await this.validateUserRole(teacherId, Role.TEACHER);
     return this.quizRepository.find({
       where: {
         createdBy: { id: teacher.id },
+      },
+      select: {
+        id: true,
+        title: true,
+        duration: true,
+        description: true,
+        createdAt: true,
+        isPublished: true,
       },
     });
   }
@@ -74,11 +120,11 @@ export class QuizService {
         id: quizId,
         createdBy: { id: teacherId },
       },
+      relations: ['createdBy'],
     });
-    if (!quiz)
-      throw new BadRequestException(ErrorMessages.quiz.invalid_quiz_id);
+    if (!quiz) throw new NotFoundException(ErrorMessages.quiz.invalid_quiz_id);
 
-    await this.quizRepository.remove(quiz);
+    await this.quizRepository.softDelete(quiz.id);
 
     return {
       success: true,
@@ -86,24 +132,29 @@ export class QuizService {
     };
   }
 
-  public async getQuizById(quizId: number) {
+  public async getQuizById(quizId: number): Promise<QuizResponseDto> {
     const quiz = await this.quizRepository.findOne({
       where: { id: quizId },
       relations: ['createdBy', 'questions'],
       select: {
         id: true,
         title: true,
+        description: true,
+        duration: true,
+        createdAt: true,
         createdBy: {
           id: true,
+          username: true,
         },
-        duration: true,
-        questions: true,
-        description: true,
-        createdAt: true,
+        questions: {
+          id: true,
+          text: true,
+          type: true,
+          options: true,
+        },
       },
     });
-    if (!quiz)
-      throw new BadRequestException(ErrorMessages.quiz.invalid_quiz_id);
+    if (!quiz) throw new NotFoundException(ErrorMessages.quiz.invalid_quiz_id);
     return quiz;
   }
 
@@ -123,13 +174,18 @@ export class QuizService {
 
   private async validateQuestionIds(
     questionIds: number[],
+    teacherId: number,
   ): Promise<Question[]> {
+    if (questionIds.length <= 0)
+      throw new BadRequestException(ErrorMessages.quiz.questions);
+
     const questions = await this.questionRepository.find({
-      where: { id: In(questionIds) },
+      where: { id: In(questionIds), createdBy: { id: teacherId } },
+      relations: ['createdBy'],
     });
 
     if (!questions || questions.length !== questionIds.length) {
-      throw new BadRequestException('question ids are invalid.');
+      throw new BadRequestException('question ids are invalid');
     }
 
     return questions;

@@ -26,62 +26,30 @@ export class QuestionService {
 
   public async createOneQuestion(
     teacherId: number,
-    quizId: number,
     createQuestionDto: CreateQuestionDto,
   ) {
     const teacher = await this.validateUserIsTeacher(teacherId);
-    const quiz = await this.validateQuiz(quizId);
-    if (quiz.createdBy.id !== teacher.id)
-      throw new BadRequestException(ErrorMessages.permission.only_owner);
-
-    const { text, type, options, correctAnswer } = createQuestionDto;
 
     const newQuestion = this.questionRepository.create({
-      text,
-      type,
-      correctAnswer,
-      options,
-      quiz: { id: quiz.id },
+      ...createQuestionDto,
+      quiz: null,
+      createdBy: { id: teacher.id },
     });
     await this.questionRepository.save(newQuestion);
 
-    quiz.questions = [...(quiz.questions || []), newQuestion];
-    await this.quizRepository.save(quiz);
-
     return newQuestion;
-  }
-
-  public async createManyQuestions(
-    teacherId: number,
-    quizId: number,
-    CreateQuestionDto: CreateQuestionDto[],
-  ) {
-    const teacher = await this.validateUserIsTeacher(teacherId);
-    const quiz = await this.validateQuiz(quizId);
-    if (quiz.createdBy.id !== teacher.id)
-      throw new BadRequestException(ErrorMessages.permission.only_owner);
-
-    const questions = CreateQuestionDto.map((question) =>
-      this.questionRepository.create({ ...question, quiz: { id: quiz.id } }),
-    );
-    quiz.questions = questions;
-    await this.quizRepository.save(quiz);
-
-    return this.questionRepository.save(questions);
   }
 
   public async getAllQuizQuestions(quizId: number) {
     const quiz = await this.validateQuiz(quizId);
     return this.questionRepository.find({
       where: { quiz: { id: quiz.id } },
-      relations: ['quiz'],
       select: {
         id: true,
         text: true,
         type: true,
         options: true,
-        correctAnswer: true,
-        quiz: { id: true, title: true },
+        correctAnswer: false,
       },
     });
   }
@@ -93,27 +61,15 @@ export class QuestionService {
     return this.questionRepository.findBy({ id: questionId });
   }
 
-  public async deleteQuestionById(
-    teacherId: number,
-    quizId: number,
-    questionId: number,
-  ) {
+  public async deleteQuestionById(teacherId: number, questionId: number) {
     const teacher = await this.validateUserIsTeacher(teacherId);
-    const quiz = await this.validateQuiz(quizId);
-    if (quiz.createdBy.id !== teacher.id)
-      throw new BadRequestException(ErrorMessages.permission.only_owner);
     const question = await this.questionRepository.findOne({
       where: {
         id: questionId,
-        quiz: { id: quizId },
+        createdBy: { id: teacher.id },
       },
     });
-
     if (!question) throw new NotFoundException();
-
-    // quiz.questions = quiz.questions.filter(
-    //   (question) => question.id !== quizId,
-    // );
 
     await this.questionRepository.remove(question);
 

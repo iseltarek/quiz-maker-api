@@ -2,6 +2,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   ManyToOne,
   OneToMany,
@@ -31,13 +32,19 @@ export class Quiz {
   @CreateDateColumn()
   createdAt: Date;
 
+  @Column({ type: 'timestamp' })
+  startAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
+
   @ManyToOne(() => User, (user) => user.createdQuizzes)
   createdBy: User;
 
-  // @ManyToMany(() => Question)
-  // @JoinTable()
-  // questions: Question[];
-  @OneToMany(() => Question, (question) => question.quiz, { cascade: true })
+  @OneToMany(() => Question, (question) => question.quiz, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   questions: Question[];
   @OneToMany(() => Result, (result) => result.quiz)
   results: Result[];
