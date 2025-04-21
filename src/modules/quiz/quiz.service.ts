@@ -31,6 +31,7 @@ export class QuizService {
       createQuizDto;
     if (questions.length > 20 || questions.length < 2)
       throw new BadRequestException(ErrorMessages.quiz.questions);
+
     const createdQuestions = questions.map((question) =>
       this.questionRepository.create({
         ...question,
