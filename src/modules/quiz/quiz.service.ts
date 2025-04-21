@@ -46,16 +46,18 @@ export class QuizService {
       description,
       questions,
       startAt,
-      isPublished: is_published,
+      is_published: is_published,
       createdBy: { id: teacher.id, username: teacher.username },
     });
+
     const savedQuiz = await this.quizRepository.save(newQuiz);
+
     return {
       id: savedQuiz.id,
       title: savedQuiz.title,
       duration: savedQuiz.duration,
       description: savedQuiz.description,
-      isPublished: savedQuiz.isPublished,
+      is_published: savedQuiz.is_published,
       createdBy: savedQuiz.createdBy.id,
       createdAt: savedQuiz.createdAt,
       questions: savedQuiz.questions,
@@ -108,7 +110,7 @@ export class QuizService {
         duration: true,
         description: true,
         createdAt: true,
-        isPublished: true,
+        is_published: true,
       },
     });
   }

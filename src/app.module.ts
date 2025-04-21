@@ -14,6 +14,7 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { QuizModule } from './modules/quiz/quiz.module';
 import { QuestionModule } from './modules/question/question.module';
+import { SubmittedAnswer } from './database/entities/submitedAnswers.entity';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { QuestionModule } from './modules/question/question.module';
       username: 'root',
       password: 'iseL2424#',
       database: 'quiz_maker',
-      entities: [Quiz, User, Question, Result],
+      entities: [Quiz, User, Question, Result, SubmittedAnswer],
       synchronize: true,
     }),
     AuthModule,

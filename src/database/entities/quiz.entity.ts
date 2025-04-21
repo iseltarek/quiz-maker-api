@@ -7,6 +7,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Question } from './questions.entity';
 import { Result } from './results.entity';
@@ -27,7 +28,10 @@ export class Quiz {
   description: string;
 
   @Column({ default: false })
-  isPublished: boolean;
+  is_published: boolean;
+
+  @UpdateDateColumn()
+  startedAt: Date;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -46,6 +50,7 @@ export class Quiz {
     onDelete: 'CASCADE',
   })
   questions: Question[];
+
   @OneToMany(() => Result, (result) => result.quiz)
   results: Result[];
 }

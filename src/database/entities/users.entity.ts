@@ -36,6 +36,7 @@ export class User {
 
   @OneToMany(() => Result, (result) => result.student)
   results: Result[];
+
   @OneToMany(() => Question, (question) => question.createdBy)
   createdQuestions: Question[];
 }
