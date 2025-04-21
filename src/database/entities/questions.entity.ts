@@ -1,7 +1,14 @@
 /* eslint-disable prettier/prettier */
 import { QuestionType } from 'src/utlis/enum/question-type.enum';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Quiz } from './quiz.entity';
+import { SubmittedAnswer } from './submitedAnswers.entity';
 
 interface QuestionOption {
   id: string;
@@ -27,4 +34,7 @@ export class Question {
 
   @ManyToOne(() => Quiz, (quiz) => quiz.questions)
   quiz: Quiz;
+
+  @OneToMany(() => SubmittedAnswer, (submitted) => submitted.question)
+  submittedAnswers: SubmittedAnswer[];
 }

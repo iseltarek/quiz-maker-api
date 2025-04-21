@@ -29,6 +29,9 @@ export class Quiz {
   @Column({ default: false })
   is_published: boolean;
 
+  @Column()
+  score: number;
+
   @UpdateDateColumn()
   startedAt: Date;
 
