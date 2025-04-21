@@ -22,7 +22,7 @@ export class Result {
   @Column({ default: false })
   passed: boolean;
 
-  @CreateDateColumn('timestamp')
+  @CreateDateColumn({ type: 'timestamp' })
   submittedAt: Date;
 
   @ManyToOne(() => Quiz, (quiz) => quiz.results)

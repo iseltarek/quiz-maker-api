@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Result } from './results.entity';
 import { Quiz } from './quiz.entity';
+import { Question } from './questions.entity';
 
 @Entity('users')
 export class User {
@@ -30,9 +31,12 @@ export class User {
   @CreateDateColumn()
   createdAt: Date;
 
+  @OneToMany(() => Quiz, (quiz) => quiz.createdBy)
+  createdQuizzes: Quiz[];
+
   @OneToMany(() => Result, (result) => result.student)
   results: Result[];
 
-  @OneToMany(() => Quiz, (quiz) => quiz.createdBy)
-  createdQuizzes: Quiz[];
+  @OneToMany(() => Question, (question) => question.createdBy)
+  createdQuestions: Question[];
 }

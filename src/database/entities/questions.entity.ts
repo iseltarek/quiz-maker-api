@@ -9,11 +9,8 @@ import {
 } from 'typeorm';
 import { Quiz } from './quiz.entity';
 import { SubmittedAnswer } from './submitedAnswers.entity';
-
-interface QuestionOption {
-  id: string;
-  text: string;
-}
+import { User } from './users.entity';
+import { QuestionOption } from 'src/utlis/common/questionOption.interface';
 
 @Entity('questions')
 export class Question {
@@ -21,20 +18,23 @@ export class Question {
   id: number;
 
   @Column()
-  questionText: string;
+  text: string;
 
   @Column({ type: 'enum', enum: QuestionType })
   type: QuestionType;
 
-  @Column('simple-json')
-  options: QuestionOption[];
+  @Column('simple-json', { nullable: true })
+  options: QuestionOption[] | null;
 
   @Column()
-  correct_answer: string;
+  correctAnswer: string;
 
   @ManyToOne(() => Quiz, (quiz) => quiz.questions)
-  quiz: Quiz;
+  quiz: Quiz | null;
 
   @OneToMany(() => SubmittedAnswer, (submitted) => submitted.question)
   submittedAnswers: SubmittedAnswer[];
+
+  @ManyToOne(() => User, (user) => user.createdQuestions)
+  createdBy: User;
 }
