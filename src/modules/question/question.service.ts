@@ -40,22 +40,6 @@ export class QuestionService {
     return newQuestion;
   }
 
-  public async createManyQuestions(
-    teacherId: number,
-    CreateQuestionDto: CreateQuestionDto[],
-  ) {
-    const teacher = await this.validateUserIsTeacher(teacherId);
-
-    const questions = CreateQuestionDto.map((question) =>
-      this.questionRepository.create({
-        ...question,
-        createdBy: { id: teacher.id },
-        quiz: null,
-      }),
-    );
-    return this.questionRepository.save(questions);
-  }
-
   public async getAllQuizQuestions(quizId: number) {
     const quiz = await this.validateQuiz(quizId);
     return this.questionRepository.find({

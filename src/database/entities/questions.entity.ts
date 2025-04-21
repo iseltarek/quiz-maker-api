@@ -17,7 +17,7 @@ export class Question {
   type: QuestionType;
 
   @Column('simple-json', { nullable: true })
-  options: QuestionOption[];
+  options: QuestionOption[] | null;
 
   @Column()
   correctAnswer: string;

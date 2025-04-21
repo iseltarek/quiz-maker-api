@@ -7,6 +7,7 @@ export class QuizResponseDto {
   duration: number;
   describtion?: string;
   createdAt: Date;
+  startAt: Date;
   createdBy: {
     id: number;
     username: string;

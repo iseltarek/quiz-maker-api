@@ -27,17 +27,6 @@ export class QuestionController {
     return this.questionService.createOneQuestion(teacherId, createQuestionDto);
   }
 
-  @Post('teacher/:teacherId/question/bulk')
-  private createManyQuestions(
-    @Param('teacherId') teacherId: number,
-    @Body() createQuestionDto: CreateQuestionDto[],
-  ) {
-    return this.questionService.createManyQuestions(
-      teacherId,
-      createQuestionDto,
-    );
-  }
-
   @Get('quiz/:quizId/questions')
   private getAllQuestions(@Param('quizId') quizId: number) {
     return this.questionService.getAllQuizQuestions(quizId);

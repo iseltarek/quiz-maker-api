@@ -32,6 +32,9 @@ export class Quiz {
   @CreateDateColumn()
   createdAt: Date;
 
+  @Column({ type: 'timestamp' })
+  startAt: Date;
+
   @DeleteDateColumn()
   deletedAt: Date;
 

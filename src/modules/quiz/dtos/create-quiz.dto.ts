@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { IsNotEmpty } from '@nestjs/class-validator';
+import { IsDate, IsNotEmpty } from '@nestjs/class-validator';
 import {
   IsArray,
   IsBoolean,
@@ -8,6 +8,7 @@ import {
   IsString,
   MaxLength,
 } from 'class-validator';
+import { CreateQuestionDto } from 'src/modules/question/dtos/create-question.dto';
 
 export class CreateQuizDto {
   @IsNotEmpty()
@@ -24,9 +25,13 @@ export class CreateQuizDto {
   @MaxLength(100)
   description?: string;
 
+  @IsNotEmpty()
+  @IsDate()
+  startAt: Date;
+
   @IsArray()
   @IsNotEmpty()
-  questionsIds: number[];
+  questions: CreateQuestionDto[];
 
   @IsBoolean()
   is_published: boolean = false;

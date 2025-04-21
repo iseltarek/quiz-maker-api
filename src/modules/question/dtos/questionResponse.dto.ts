@@ -6,5 +6,5 @@ export class QuestionResponseDto {
   id: number;
   text: string;
   type: QuestionType;
-  options: QuestionOption[];
+  options: QuestionOption[] | null;
 }

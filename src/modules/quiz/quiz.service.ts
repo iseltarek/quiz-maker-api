@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Quiz } from 'src/database/entities/quiz.entity';
-import { In, Repository } from 'typeorm';
+import { In, LessThanOrEqual, Repository } from 'typeorm';
 import { User } from 'src/database/entities/users.entity';
 import { CreateQuizDto } from './dtos/create-quiz.dto';
 import { ErrorMessages } from 'src/utlis/common/errorMessages';
@@ -27,16 +27,25 @@ export class QuizService {
   public async createQuiz(teacherId: number, createQuizDto: CreateQuizDto) {
     const teacher = await this.validateUserRole(teacherId, Role.TEACHER);
 
-    const { title, duration, description, is_published, questionsIds } =
+    const { title, duration, startAt, description, is_published, questions } =
       createQuizDto;
-
-    const questions = await this.validateQuestionIds(questionsIds, teacherId);
+    if (questions.length > 20 || questions.length < 2)
+      throw new BadRequestException(ErrorMessages.quiz.questions);
+    const createdQuestions = questions.map((question) =>
+      this.questionRepository.create({
+        ...question,
+        createdBy: { id: teacher.id },
+        quiz: null,
+      }),
+    );
+    await this.questionRepository.save(createdQuestions);
 
     const newQuiz = this.quizRepository.create({
       title,
       duration,
       description,
-      questions: questions,
+      questions,
+      startAt,
       isPublished: is_published,
       createdBy: { id: teacher.id, username: teacher.username },
     });
@@ -49,6 +58,8 @@ export class QuizService {
       isPublished: savedQuiz.isPublished,
       createdBy: savedQuiz.createdBy.id,
       createdAt: savedQuiz.createdAt,
+      questions: savedQuiz.questions,
+      startAt: savedQuiz.startAt,
     };
   }
 
@@ -56,13 +67,16 @@ export class QuizService {
     userId: number,
   ): Promise<QuizResponseDto[]> {
     await this.validateUserRole(userId, Role.STUDENT);
+    const now = new Date();
+
     const quizzes = this.quizRepository.find({
-      //   where: { isPublished: true },
+      where: { startAt: LessThanOrEqual(now) },
       relations: ['createdBy'],
       select: {
         id: true,
         title: true,
         duration: true,
+        startAt: true,
         questions: {
           id: true,
           text: true,
@@ -87,6 +101,14 @@ export class QuizService {
     return this.quizRepository.find({
       where: {
         createdBy: { id: teacher.id },
+      },
+      select: {
+        id: true,
+        title: true,
+        duration: true,
+        description: true,
+        createdAt: true,
+        isPublished: true,
       },
     });
   }
@@ -155,7 +177,7 @@ export class QuizService {
     teacherId: number,
   ): Promise<Question[]> {
     if (questionIds.length <= 0)
-      throw new BadRequestException(ErrorMessages.quiz.no_questions);
+      throw new BadRequestException(ErrorMessages.quiz.questions);
 
     const questions = await this.questionRepository.find({
       where: { id: In(questionIds), createdBy: { id: teacherId } },

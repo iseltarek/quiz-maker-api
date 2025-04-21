@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
 export interface QuestionOption {
-  id: string;
+  is_correct: boolean;
   text: string;
 }
