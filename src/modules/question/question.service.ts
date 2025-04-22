@@ -42,7 +42,7 @@ export class QuestionService {
 
   public async getAllQuizQuestions(quizId: number) {
     const quiz = await this.validateQuiz(quizId);
-    return this.questionRepository.find({
+    return await this.questionRepository.find({
       where: { quiz: { id: quiz.id } },
       select: {
         id: true,
@@ -58,7 +58,7 @@ export class QuestionService {
     const question = this.questionRepository.findOneBy({ id: questionId });
     if (!question)
       throw new BadRequestException(ErrorMessages.quiz.invalid_quiz_id);
-    return this.questionRepository.findBy({ id: questionId });
+    return await this.questionRepository.findBy({ id: questionId });
   }
 
   public async deleteQuestionById(teacherId: number, questionId: number) {

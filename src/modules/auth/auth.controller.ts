@@ -8,8 +8,6 @@ import { Request } from '@nestjs/common';
 
 @Controller('auth')
 export class AuthController {
-  //post signup
-  //post login
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')

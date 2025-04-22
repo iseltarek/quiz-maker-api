@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
-import { IsDate, IsNotEmpty } from '@nestjs/class-validator';
+import { ArrayMaxSize, IsDate, IsNotEmpty } from '@nestjs/class-validator';
 import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
   IsArray,
   IsBoolean,
   IsNumber,
@@ -33,6 +34,8 @@ export class CreateQuizDto {
 
   @IsArray()
   @IsNotEmpty()
+  @ArrayMinSize(2)
+  @ArrayMaxSize(10)
   questions: CreateQuestionDto[];
 
   @IsBoolean()
