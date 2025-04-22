@@ -23,6 +23,7 @@ export class ErrorMessages {
     questions: 'Quiz must atleast have 2 questions and at most 10',
     questionsNotvalid:
       'One or more submitted questions do not belong to this quiz',
+    quiztime: 'quiz has not started yet',
   };
   static readonly permission = {
     only_owner: 'Only teachers can perform this action on exams',
