@@ -15,6 +15,7 @@ import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { CreateQuizDto } from './dtos/create-quiz.dto';
 import { QuizService } from './quiz.service';
 import { ErrorMessages } from 'src/utlis/common/errorMessages';
+import { Role } from 'src/utlis/enum/user-role.enum';
 
 @UseGuards(AuthGuard)
 @Controller('')
@@ -35,16 +36,19 @@ export class QuizController {
   @Get('student/:studentId/quiz')
   public getAllPublishedQuizzes(
     @Param('studentId') id: number,
-    @CurrentUser() student: { id: number },
+    @CurrentUser() studentId: { id: number },
   ) {
-    if (id != student.id)
+    if (id != studentId.id)
       throw new BadRequestException(ErrorMessages.user.user_id_invalid);
-    return this.quizService.getAllPublishedQuizzes(student.id);
+    return this.quizService.getAllPublishedQuizzes(studentId.id);
   }
 
   @Get('quiz/:quizid')
-  public getQuizById(@Param('quizid', ParseIntPipe) quizid: number) {
-    return this.quizService.getQuizById(quizid);
+  public getQuizById(
+    @Param('quizid', ParseIntPipe) quizid: number,
+    @CurrentUser() student: { id: number; role: Role },
+  ) {
+    return this.quizService.getQuizById(quizid, student);
   }
 
   @Get('teacher/:teacherId/quiz')

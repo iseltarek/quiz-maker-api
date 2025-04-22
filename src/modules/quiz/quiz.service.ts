@@ -8,13 +8,14 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Quiz } from 'src/database/entities/quiz.entity';
-import { In, LessThanOrEqual, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { User } from 'src/database/entities/users.entity';
 import { CreateQuizDto } from './dtos/create-quiz.dto';
 import { ErrorMessages } from 'src/utlis/common/errorMessages';
 import { Role } from 'src/utlis/enum/user-role.enum';
 import { Question } from 'src/database/entities/questions.entity';
 import { QuizResponseDto } from './dtos/quizResponse.dto';
+import { Result } from 'src/database/entities/results.entity';
 @Injectable()
 export class QuizService {
   constructor(
@@ -22,13 +23,14 @@ export class QuizService {
     @InjectRepository(Quiz) private quizRepository: Repository<Quiz>,
     @InjectRepository(Question)
     private questionRepository: Repository<Question>,
+    @InjectRepository(Result)
+    private resultRepository: Repository<Result>,
   ) {}
 
   public async createQuiz(teacherId: number, createQuizDto: CreateQuizDto) {
     const teacher = await this.validateUserRole(teacherId, Role.TEACHER);
 
-    const { title, duration, startAt, description, is_published, questions } =
-      createQuizDto;
+    const { title, duration, startAt, description, questions } = createQuizDto;
     if (questions.length > 20 || questions.length < 2)
       throw new BadRequestException(ErrorMessages.quiz.questions);
 
@@ -47,7 +49,7 @@ export class QuizService {
       description,
       questions,
       startAt,
-      is_published: is_published,
+      is_published: false,
       createdBy: { id: teacher.id, username: teacher.username },
     });
 
@@ -70,16 +72,15 @@ export class QuizService {
     userId: number,
   ): Promise<QuizResponseDto[]> {
     await this.validateUserRole(userId, Role.STUDENT);
-    const now = new Date();
 
-    const quizzes = this.quizRepository.find({
-      where: { startAt: LessThanOrEqual(now) },
+    const quizzes = await this.quizRepository.find({
       relations: ['createdBy'],
       select: {
         id: true,
         title: true,
         duration: true,
         startAt: true,
+        is_published: true,
         questions: {
           id: true,
           text: true,
@@ -93,6 +94,15 @@ export class QuizService {
           username: true,
         },
       },
+      order: {
+        startAt: 'DESC',
+      },
+    });
+    const now = new Date();
+    quizzes.forEach((quiz) => {
+      if (new Date(quiz.startAt) <= now) {
+        quiz.is_published = true;
+      }
     });
     return quizzes;
   }
@@ -129,13 +139,13 @@ export class QuizService {
 
     await this.quizRepository.softDelete(quiz.id);
 
-    return {
-      success: true,
-      message: 'Quiz deleted successfully',
-    };
+    return 'done';
   }
 
-  public async getQuizById(quizId: number): Promise<QuizResponseDto> {
+  public async getQuizById(
+    quizId: number,
+    student: { id: number; role: Role },
+  ): Promise<QuizResponseDto> {
     const quiz = await this.quizRepository.findOne({
       where: { id: quizId },
       relations: ['createdBy', 'questions'],
@@ -145,9 +155,11 @@ export class QuizService {
         description: true,
         duration: true,
         createdAt: true,
+        startAt: true,
         createdBy: {
           id: true,
           username: true,
+          role: true,
         },
         questions: {
           id: true,
@@ -158,6 +170,24 @@ export class QuizService {
       },
     });
     if (!quiz) throw new NotFoundException(ErrorMessages.quiz.invalid_quiz_id);
+    if (quiz.startAt > new Date())
+      throw new UnauthorizedException(ErrorMessages.quiz.quiztime);
+
+    const existingResult = await this.resultRepository.findOne({
+      where: {
+        student: { id: student.id },
+        quiz: { id: quizId },
+      },
+    });
+    if (existingResult) {
+      throw new BadRequestException({
+        message: 'You have already submitted this quiz.',
+        score: existingResult.score,
+        numberOfQuestions: quiz.questions.length,
+        passed: existingResult.passed,
+        submittedAt: existingResult.submittedAt,
+      });
+    }
     return quiz;
   }
 
